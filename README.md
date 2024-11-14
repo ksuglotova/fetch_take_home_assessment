@@ -23,7 +23,7 @@ UNIX timestamps are converted to timestamp data type for the ease of use date ti
 
 ## ER diagram
 
-ER diagram is [here](./data_models/fetch_take_home_assessment_erd.png)
+ER diagram is ![here](https://github.com/ksuglotova/fetch_take_home_assessment/blob/main/data_models/fetch_take_home_assessment_erd.png?raw=true)
 
 ## Answers to the predetermined questions
 1. What are the top 5 brands by receipts scanned for most recent month? [Query question_1](./questions/question_1.sql)
