@@ -10,7 +10,7 @@ Resulted tables are processed to create stages (respective queries are stored in
 - [stg_receipts](./staging/stg_receipts.sql) (receipts.json)
 - [stg_receipt_line_items](./staging/stg_receipt_line_items.sql) (stg_receipts.rewards_receipt_item_list)
 - [stg_users](./staging/stg_users.sql) (users.json)
-- [fct_receipt_line_items_brands](./staging/stg_receipt_line_items_brands.sql)
+- [fct_receipt_line_items_brands](./staging/fct_receipt_line_items_brands.sql)
 Tables are created using DDL statements.
 UNIX timestamps are converted to timestamp data type for the ease of use date time functions.
 
