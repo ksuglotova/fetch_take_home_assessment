@@ -19,7 +19,7 @@ UNIX timestamps are converted to timestamp data type for the ease of use date ti
 1. Assuming the data is updated at least daily, the reporting period for the purpose of the exercise is defined by minimum maximum scanned date from receipts data: 2020-10-30 and 2021-03-01 respectively. So the current month is March 2021. For the questions related to brands, the current month is set to February 2021 because of no purchase with brands in March 2021.
 2. Unknown brands (missing brand data) are excluded on the questions related to brands. Brand data is defined by the entry in brands by brandCode, or barcode if brandCode is missing in the receipt line item.
 3. Transaction is defined by the number of receipt line items. Receipt line items with the same receipt id belong to different transactions.
-4. I assume that the company uses dbt or its alternative for data transformation.
+4. The company uses dbt or its alternative for data transformation.
 5. "By receipts scanned" is defined by the number of unique receipts scanned in the specific month.
 6. Spend by brand is defined by the final sum times purchased quantity from the receipt line item matched to the specific brand.
 
