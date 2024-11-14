@@ -21,9 +21,17 @@ UNIX timestamps are converted to timestamp data type for the ease of use date ti
 3. Transaction is defined by receipt id. Receipt line items with the same receipt id belong to the same transaction.
 4. I assume that the company uses dbt or its alternative for data transformation.
 
+## Data quality assumptions
+
+1. Dimensions: brands, CPG, users. 
+1. Facts: receipts and receipt line items (purchased products).
+1. Brand data is required in facts.
+1. Product description or barcode are required in facts in order to identify a purchased product.
+1. Users are often created with some difference in the creation timestamp (for example, 1 second, 1 millisecond).
+
 ## ER diagram
 
-ER diagram is ![here](https://github.com/ksuglotova/fetch_take_home_assessment/blob/main/data_models/fetch_take_home_assessment_erd.png?raw=true)
+![here](https://github.com/ksuglotova/fetch_take_home_assessment/blob/main/data_models/fetch_take_home_assessment_erd.png?raw=true)
 
 ## Answers to the predetermined questions
 1. What are the top 5 brands by receipts scanned for most recent month? [Query question_1](./questions/question_1.sql)
@@ -64,17 +72,43 @@ ER diagram is ![here](https://github.com/ksuglotova/fetch_take_home_assessment/b
 
 ## Data Quality Issues
 
-1. Missing brand data in receipt line items and missing barcodes and brand codes in brands. [Query 1_missing_brands](./data_quality/1_missing_brands.sql)
+Data quality was assessed for:
+- Column property enforcement
+- Structure enforcement
+- Data and value rule enforcement (limited due to subject matter specificity).
+
+### Column property enforcement
+
+1. Null values in the required columns. 
+
+	* In case of missing `brand_code` (see the referential integrity issue in the Structure Enforcement section below), we can try to match brands to the purchases using `barcode` and/or `description` values. These values are also missing in some cases in the receipt line items.
+
+	* Missing product description in the receipt line item entries which makes it difficult to identify the inventory of the transaction. [Query 3_1_missing_product_description](./data_quality/3_1_missing_product_description.sql)
+	
+	* Barcode is missing when there is no brand code in the receipt line items. [Query 3_2_missing_barcode_brand_code](./data_quality/3_2_missing_barcode_brand_code.sql)
+	
+
+### Structure enforcement
+
+1. Null values in the required columns: `brand_code` is missing in some receipt line item entries which does not abide a referential integrity of DWH models.
+	
+	* Missing brand data in receipt line items and missing barcodes and brand codes in brands. [Query 1_missing_brands](./data_quality/1_missing_brands.sql)
 
 	* Out of 6941 there are 3944 line items with barcode or brand code to potentially match with brands.
 	Nonetheless, because of missing reference in brands, only 635 rows from receipt line items were matched with brands.
 	One of the solutions for historical data in DWH could be to update the brand code in the receipt line items using brand code from the product description. The permanent solution should be implemented in the upstream process(es).
 
-2. CPG data in brands dimension have the same reference (`cpg_ref` column) with many different identifiers. [Query 2_cpg_dimension](./data_quality/2_cpg_dimension.sql)
+2. Ambiguous CPG value set. 
 
-3. Missing product description in the receipt line item entries which makes it difficult to identify the inventory of the transaction. [Query 3_missing_product_description](./data_quality/3_missing_product_description.sql)
+	* CPG data in brands dimension have the same reference (`cpg_ref` column) with many different identifiers. [Query 2_cpg_dimension](./data_quality/2_cpg_dimension.sql)
 
-4. There are multiple users created in the same second, which looks questionable. [Query 4_multiple_users_created](./data_quality/4_multiple_users_created.sql)
+3. (Possibly) Missing hierarchical parent-child relationship.
+
+	* Missing parent brand value in the brands dimension as it's seen on ERD in the `stg_brands` dimension.
+
+### Data and value rule enforcement
+
+1. There are multiple users created in the same second, which looks questionable. [Query 4_multiple_users_created](./data_quality/4_multiple_users_created.sql)
 
 
 ## Communication with Stakeholders
@@ -82,9 +116,10 @@ ER diagram is ![here](https://github.com/ksuglotova/fetch_take_home_assessment/b
 ### 1. What questions do you have about the data?
 
 1. Could you please tell whether CPG data is valuable to bring them into reports? If so, which reports would benefit from CPG data?
-2. I would like to understand better products and brands in the receipts. Could you please tell me what is the most important information we're getting from receipt line items?
-3. Would you mind explaining the ways how we create internal users?
-4. What would be the most valuable issue with missing/incomplete/inconsistent data in your opinion?
+1. I would like to understand better products and brands in the receipts. Could you please tell me what is the most important information we're getting from receipt line items?
+1. It looks that we have hierarchical brand data structure. Could you please let me know if we have a reference of our brands hierarchy?
+1. Would you mind explaining the ways how we create internal users?
+1. What would be the most valuable issue with missing/incomplete/inconsistent data in your opinion?
 
 ### 2. How did you discover the data quality issues?
 
