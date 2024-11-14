@@ -5,12 +5,12 @@ The source data and data models are processed in BigQuery.
 JSON files are edited to upload into Bigquery: 
 - removed `$` in the column name.
 
-Resulted tables are processed to create stages (respective queries are stored in `\staging\` and `\marts\` directories):
-- stg_brands (brands.json)
-- stg_receipts (receipts.json)
-- stg_receipt_line_items (stg_receipts.rewards_receipt_item_list)
-- stg_users (users.json)
-- fct_receipt_line_items_brands
+Resulted tables are processed to create stages (respective queries are stored in [staging](./staging/) and [marts](./marts/) directories):
+- [stg_brands](./staging/stg_brands.sql) (brands.json) 
+- [stg_receipts](./staging/stg_receipts.sql) (receipts.json)
+- [stg_receipt_line_items](./staging/stg_receipt_line_items.sql) (stg_receipts.rewards_receipt_item_list)
+- [stg_users](./staging/stg_users.sql) (users.json)
+- [fct_receipt_line_items_brands](./staging/stg_receipt_line_items_brands.sql)
 Tables are created using DDL statements.
 UNIX timestamps are converted to timestamp data type for the ease of use date time functions.
 
@@ -23,45 +23,58 @@ UNIX timestamps are converted to timestamp data type for the ease of use date ti
 
 ## ER diagram
 
-ER diagram is stored in `\data_models\`
+ER diagram is [here](./data_models/fetch_take_home_assessment_erd.png)
 
 ## Answers to the predetermined questions
-Queries used to find out the answers to the questions are stored in `\questions\`.
+1. What are the top 5 brands by receipts scanned for most recent month? [Query question_1](./questions/question_1.sql)
 
-1. What are the top 5 brands by receipts scanned for most recent month?
-In February 2021 there's only 1 brand in scanned receipts:
-	Viva - 3.92
+	* In February 2021 there's only 1 brand in scanned receipts:
 
-2. How does the ranking of the top 5 brands by receipts scanned for the recent month compare to the ranking for the previous month?
-In January 2021 top 5 brands by the receipts scanned were:
-	Cracker Barrel Cheese - 5290.32
-	KNORR - 4543.23
-	Pepsi - 848.94
-	Doritos - 765.26
-	Kleenex - 759.25
+	| Brand | Amount from scanned receipts |
+	| --- | --- |
+	| Viva | 3.92 |
 
-In February 2021 there's only 1 brand in scanned receipts:
-	Viva - 3.92
+2. How does the ranking of the top 5 brands by receipts scanned for the recent month compare to the ranking for the previous month? [Query question_2](./questions/question_2.sql)
 
-We can conclude there are different brands in the purchases in February and January 2021.
+	* In January 2021 top 5 brands by the receipts scanned were:
+
+	| Brand | Amount from scanned receipts |
+	| --- | --- |
+	| Cracker Barrel Cheese | 5290.32 |
+	| KNORR | 4543.23 |
+	| Pepsi | 848.94 |
+	| Doritos | 765.26 |
+	| Kleenex | 759.25 |
+
+	* In February 2021 there's only 1 brand in scanned receipts:
+
+	| Brand | Amount from scanned receipts |
+	| --- | --- |
+	| Viva | 3.92 |
+
+	* We can conclude there are different brands in the purchases in February and January 2021.
 	
-3. When considering average spend from receipts with 'rewardsReceiptStatus’ of ‘Accepted’ or ‘Rejected’, which is greater?
-4. When considering total number of items purchased from receipts with 'rewardsReceiptStatus’ of ‘Accepted’ or ‘Rejected’, which is greater?
-5. Which brand has the most spend among users who were created within the past 6 months?
-	Kleenex has the most spend (26.78) among users who created within the past 6 month since January 1st, 2021.
+5. Which brand has the most spend among users who were created within the past 6 months? [Query question_5](./questions/question_5.sql)
+
+	* Kleenex has the most spend (26.78) among users who created within the past 6 month since January 1st, 2021.
 	
-6. Which brand has the most transactions among users who were created within the past 6 months?
-	Kleenex has the most transactions among users who were created within the past 6 months, 2 transactions.
+6. Which brand has the most transactions among users who were created within the past 6 months? [Query question_6](./questions/question_6.sql)
+
+	* Kleenex has the most transactions among users who were created within the past 6 months (2 transactions).
 
 ## Data Quality Issues
 
-1. Missing brand data in receipt line items and missing barcodes and brand codes in brands.
-Out of 6941 there are 3944 line items with barcode or brand code to potentially match with brands.
-Nonetheless, because of missing reference in brands, only 635 rows from receipt line items were matched with brands.
-One of the solutions for historical data in DWH could be to update the brand code in the receipt line items using brand code from the product description. The permanent solution should be implemented in the upstream process(es).
-2. CPG data in brands dimension have the same reference (`cpg_ref` column) with many different identifiers.
-3. Missing product description in the receipt line item entries which makes it difficult to identify the inventory of the transaction.
-4. There are multiple users created in the same second, which looks questionable.
+1. Missing brand data in receipt line items and missing barcodes and brand codes in brands. [Query 1_missing_brands](./data_quality/1_missing_brands.sql)
+
+	* Out of 6941 there are 3944 line items with barcode or brand code to potentially match with brands.
+	Nonetheless, because of missing reference in brands, only 635 rows from receipt line items were matched with brands.
+	One of the solutions for historical data in DWH could be to update the brand code in the receipt line items using brand code from the product description. The permanent solution should be implemented in the upstream process(es).
+
+2. CPG data in brands dimension have the same reference (`cpg_ref` column) with many different identifiers. [Query 2_cpg_dimension](./data_quality/2_cpg_dimension.sql)
+
+3. Missing product description in the receipt line item entries which makes it difficult to identify the inventory of the transaction. [Query 3_missing_product_description](./data_quality/3_missing_product_description.sql)
+
+4. There are multiple users created in the same second, which looks questionable. [Query 4_multiple_users_created](./data_quality/4_multiple_users_created.sql)
 
 
 ## Communication with Stakeholders
@@ -76,8 +89,7 @@ One of the solutions for historical data in DWH could be to update the brand cod
 ### 2. How did you discover the data quality issues?
 
 With respect to data quality issues, I mainly assessed that we have reasonably correct data for the dimensions (brands, users, CPG), we're able to match facts (receipts) with dimensions, and the dates in facts make sense (e.g. users created before their first login).
-The queries I used for that are stored in `\data_quality\`.
-I would appreciate it if you point out the most important data quality issues from your perspective.
+The queries I used for that are linked above.
 
 ### 3. What do you need to know to resolve the data quality issues?
 If that's fine, I would like to understand upstream ELT processes better. This, and the answers to the questions about data, would allow me to come up with the plan to tackle data quality issues in a predictable and organized manner.
