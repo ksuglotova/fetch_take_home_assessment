@@ -1,8 +1,10 @@
+-- How does the ranking of the top 5 brands by receipts scanned for the recent month compare to the ranking for the previous month?
 WITH
   data_tmp AS (
   SELECT
     DATE_TRUNC(DATE(scanned_timestamp), month) AS scanned_month,
     brand_name,
+	COUNT(DISTINCT id) AS receipt_cnt,
     SUM(CAST(final_price AS numeric) * CAST(quantity_purchased AS numeric)) AS total_sum
   FROM
     `my-project.fetch_test_exercise.fct_receipt_line_items_brands`
@@ -14,8 +16,8 @@ WITH
     2)
 SELECT
   *,
-  DENSE_RANK() OVER (PARTITION BY scanned_month ORDER BY total_sum DESC) AS brand_rank
+  RANK() OVER (PARTITION BY scanned_month ORDER BY receipt_cnt DESC) AS brand_rank
 FROM
   data_tmp
 QUALIFY
-  DENSE_RANK() OVER (PARTITION BY scanned_month ORDER BY total_sum DESC) <= 5
+  RANK() OVER (PARTITION BY scanned_month ORDER BY receipt_cnt DESC) <= 5

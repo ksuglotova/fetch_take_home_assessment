@@ -18,8 +18,10 @@ UNIX timestamps are converted to timestamp data type for the ease of use date ti
 
 1. Assuming the data is updated at least daily, the reporting period for the purpose of the exercise is defined by minimum maximum scanned date from receipts data: 2020-10-30 and 2021-03-01 respectively. So the current month is March 2021. For the questions related to brands, the current month is set to February 2021 because of no purchase with brands in March 2021.
 2. Unknown brands (missing brand data) are excluded on the questions related to brands. Brand data is defined by the entry in brands by brandCode, or barcode if brandCode is missing in the receipt line item.
-3. Transaction is defined by receipt id. Receipt line items with the same receipt id belong to the same transaction.
+3. Transaction is defined by the number of receipt line items. Receipt line items with the same receipt id belong to different transactions.
 4. I assume that the company uses dbt or its alternative for data transformation.
+5. "By receipts scanned" is defined by the number of unique receipts scanned in the specific month.
+6. Spend by brand is defined by the final sum times purchased quantity from the receipt line item matched to the specific brand.
 
 ## Data quality assumptions
 
@@ -38,37 +40,47 @@ UNIX timestamps are converted to timestamp data type for the ease of use date ti
 
 	* In February 2021 there's only 1 brand in scanned receipts:
 
-	| Brand | Amount from scanned receipts |
-	| --- | --- |
-	| Viva | 3.92 |
+	| Brand | Number of Scanned Receipts | Amount from Scanned Receipts |
+	| --- | --- | --- |
+	| Viva | 1 | 3.92 |
 
 2. How does the ranking of the top 5 brands by receipts scanned for the recent month compare to the ranking for the previous month? [Query question_2](./questions/question_2.sql)
 
 	* In January 2021 top 5 brands by the receipts scanned were:
 
-	| Brand | Amount from scanned receipts |
-	| --- | --- |
-	| Cracker Barrel Cheese | 5290.32 |
-	| KNORR | 4543.23 |
-	| Pepsi | 848.94 |
-	| Doritos | 765.26 |
-	| Kleenex | 759.25 |
+	| Brand | Number of Scanned Receipts | Amount from Scanned Receipts |
+	| --- | --- | --- |
+	| Pepsi | 23 | 848.94 |
+	| Kraft | 22 | 133.53 |
+	| Kleenex | 21 | 759.25 |
+	| KNORR | 19 | 4543.23 |
+	| Doritos | 19 | 765.26 |
+	
 
 	* In February 2021 there's only 1 brand in scanned receipts:
 
-	| Brand | Amount from scanned receipts |
-	| --- | --- |
-	| Viva | 3.92 |
+	| Brand | Number of Scanned Receipts | Amount from Scanned Receipts |
+	| --- | --- | --- |
+	| Viva | 1 | 3.92 |
 
 	* We can conclude there are different brands in the purchases in February and January 2021.
 	
 5. Which brand has the most spend among users who were created within the past 6 months? [Query question_5](./questions/question_5.sql)
-
-	* Kleenex has the most spend (26.78) among users who created within the past 6 month since January 1st, 2021.
+	
+	* Kleenex has the most spend among users who created within the past 6 month since January 1st, 2021.
+	
+	| Brand | Spend |
+	| --- | --- |
+	| Kleenex | 26.78 |
 	
 6. Which brand has the most transactions among users who were created within the past 6 months? [Query question_6](./questions/question_6.sql)
 
-	* Kleenex has the most transactions among users who were created within the past 6 months (2 transactions).
+	* Kleenex and KNORR have the most transactions among users who were created within the past 6 months.
+	
+	| Brand | Number of Transactions |
+	| --- | --- |
+	| Kleenex | 26.78 |
+	| KNORR | 1 |
 
 ## Data Quality Issues
 

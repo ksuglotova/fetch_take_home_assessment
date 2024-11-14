@@ -1,3 +1,4 @@
+-- Which brand has the most spend among users who were created within the past 6 months?
 WITH
   user_data AS (
   SELECT
